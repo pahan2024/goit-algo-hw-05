@@ -11,7 +11,7 @@ def caching_fibonacci():
             return 0
         if n == 1:
             return 1
-        
+
         # Перевіряємо, чи є значення вже в кеші
         if n in cache:
             return cache[n]
@@ -22,8 +22,6 @@ def caching_fibonacci():
 
     # Повертаємо внутрішню функцію
     return fibonacci
-
-# --- Приклад використання ---
 
 # Отримуємо екземпляр функції fibonacci з власним кешем
 fib = caching_fibonacci()
