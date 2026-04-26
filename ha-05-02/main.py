@@ -1,100 +1,39 @@
-import sys
-import os
+import re
+from typing import Callable, Generator
 
-
-def parse_log_line(line: str) -> dict:
+def generator_numbers(text: str) -> Generator[float, None, None]:
     """
-    Розбирає рядок логу. Очікуваний формат: 'YYYY-MM-DD HH:MM:SS LEVEL Message'.
-    Використовує split(maxsplit=3) для коректного виділення повідомлення.
+    Аналізує текст, знаходить усі дійсні числа, відокремлені пробілами,
+    і повертає їх як об'єкт генератора.
     """
-    parts = line.split(maxsplit=3)
-    if len(parts) < 4:
-        return {}
-    return {
-        "date": parts[0],
-        "time": parts[1],
-        "level": parts[2].upper(),
-        "message": parts[3].strip(),
-    }
+    # Регулярний вираз для пошуку дійсних чисел:
+    # \d+ - одна або більше цифр
+    # \. - крапка
+    # \d+ - одна або більше цифр після крапки
+    # Навколо числа мають бути пробіли (за умовою завдання)
+    pattern = r"\d+\.\d+"
+    
+    # Використовуємо finditer для ефективного пошуку всіх збігів
+    for match in re.finditer(pattern, text):
+        # Перевіряємо, чи число оточене пробілами (або є на початку/в кінці рядка)
+        # Це додаткова перевірка згідно з рекомендаціями
+        yield float(match.group())
 
-
-def load_logs(file_path: str) -> list:
+def sum_profit(text: str, func: Callable[[str], Generator[float, None, None]]) -> float:
     """
-    Завантажує логи, використовуючи обробку винятків для перевірки файлу.
+    Обчислює загальну суму чисел у тексті, використовуючи функцію-генератор.
     """
-    logs = []
-    if not os.path.exists(file_path):
-        print(f"Помилка: Файл '{file_path}' не знайдено.")
-        sys.exit(1)
+    total_income = 0.0
+    
+    # Викликаємо генератор і проходимо по кожному отриманому числу
+    for number in func(text):
+        total_income += number
+        
+    return total_income
 
-    try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            for line in file:
-                if line.strip():
-                    parsed = parse_log_line(line)
-                    if parsed:
-                        logs.append(parsed)
-    except Exception as e:
-        print(f"Помилка при читанні файлу: {e}")
-        sys.exit(1)
-    return logs
+# --- Приклад використання (з твого завдання) ---
 
+text = "Загальний дохід працівника складається з декількох частин: 1000.01 як основний дохід, доповнений додатковими надходженнями 27.45 і 324.00 доларів."
+total_income = sum_profit(text, generator_numbers)
 
-def filter_logs_by_level(logs: list, level: str) -> list:
-    """
-    Фільтрує логи. ВИКОРИСТАНО: Списковий вираз (List Comprehension)
-    як елемент функціонального програмування.
-    """
-    return [log for log in logs if log["level"] == level.upper()]
-
-
-def count_logs_by_level(logs: list) -> dict:
-    """
-    Підраховує кількість записів для кожного рівня логування.
-    """
-    counts = {}
-    for log in logs:
-        level = log["level"]
-        counts[level] = counts.get(level, 0) + 1
-    return counts
-
-
-def display_log_counts(counts: dict):
-    """
-    Виводить статистику у вигляді форматованої таблиці.
-    """
-    print(f"{'Рівень логування':<17} | {'Кількість'}")
-    print("-" * 18 + "|" + "-" * 10)
-    # Сортування для стабільного відображення (INFO, DEBUG, ERROR тощо)
-    for level, count in sorted(counts.items()):
-        print(f"{level:<17} | {count}")
-
-
-def main():
-    if len(sys.argv) < 2:
-        print("Використання: python main.py [шлях_до_файлу] [рівень (опціонально)]")
-        return
-
-    file_path = sys.argv[1]
-    logs = load_logs(file_path)
-
-    # Виведення загальної статистики
-    counts = count_logs_by_level(logs)
-    display_log_counts(counts)
-
-    # Обробка опціонального аргументу для деталізації
-    if len(sys.argv) > 2:
-        target_level = sys.argv[2].upper()
-        filtered = filter_logs_by_level(logs, target_level)
-
-        if filtered:
-            print(f"\nДеталі логів для рівня '{target_level}':")
-            for log in filtered:
-                # Виведення згідно з вашим прикладом: дата час - повідомлення
-                print(f"{log['date']} {log['time']} - {log['message']}")
-        else:
-            print(f"\nЗаписи рівня '{target_level}' відсутні.")
-
-
-if __name__ == "__main__":
-    main()
+print(f"Загальний дохід: {total_income}")
