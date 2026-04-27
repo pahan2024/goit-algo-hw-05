@@ -3,10 +3,9 @@ import os
 
 
 def parse_log_line(line: str) -> dict:
-    """
-    Розбирає рядок логу. Очікуваний формат: 'YYYY-MM-DD HH:MM:SS LEVEL Message'.
-    Використовує split(maxsplit=3) для коректного виділення повідомлення.
-    """
+    # Розбирає рядок логу. Очікуваний формат: 'YYYY-MM-DD HH:MM:SS LEVEL Message'.
+    # Використовує split(maxsplit=3) для коректного виділення повідомлення.
+    
     parts = line.split(maxsplit=3)
     if len(parts) < 4:
         return {}
@@ -19,10 +18,9 @@ def parse_log_line(line: str) -> dict:
 
 
 def load_logs(file_path: str) -> list:
-    """
-    Завантажує логи, використовуючи обробку винятків для перевірки файлу.
-    """
-    logs = []
+        # Завантажує логи, використовуючи обробку винятків для перевірки файлу.
+    
+        logs = []
     if not os.path.exists(file_path):
         print(f"Помилка: Файл '{file_path}' не знайдено.")
         sys.exit(1)
@@ -41,17 +39,15 @@ def load_logs(file_path: str) -> list:
 
 
 def filter_logs_by_level(logs: list, level: str) -> list:
-    """
-    Фільтрує логи. ВИКОРИСТАНО: Списковий вираз (List Comprehension)
-    як елемент функціонального програмування.
-    """
+    
+    # Фільтрує логи. 
+    
     return [log for log in logs if log["level"] == level.upper()]
 
 
 def count_logs_by_level(logs: list) -> dict:
-    """
-    Підраховує кількість записів для кожного рівня логування.
-    """
+    # Підраховує кількість записів для кожного рівня логування.
+    
     counts = {}
     for log in logs:
         level = log["level"]
@@ -60,9 +56,9 @@ def count_logs_by_level(logs: list) -> dict:
 
 
 def display_log_counts(counts: dict):
-    """
-    Виводить статистику у вигляді форматованої таблиці.
-    """
+    
+    # Виводить статистику у вигляді форматованої таблиці.
+    
     print(f"{'Рівень логування':<17} | {'Кількість'}")
     print("-" * 18 + "|" + "-" * 10)
     # Сортування для стабільного відображення (INFO, DEBUG, ERROR тощо)
